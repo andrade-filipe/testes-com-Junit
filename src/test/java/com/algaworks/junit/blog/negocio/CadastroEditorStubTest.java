@@ -12,8 +12,8 @@ import java.math.BigDecimal;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Nested
-@DisplayName("CadastroEditor")
-class CadastroEditorTest {
+@DisplayName("CadastroEditor com Stub")
+class CadastroEditorStubTest {
 
     private CadastroEditor cadastroEditor;
     private ArmazenamentoEditorStub armazenamentoEditor;
