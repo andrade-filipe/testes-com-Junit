@@ -22,16 +22,12 @@ import static org.mockito.Mockito.*;
 @DisplayName("Cadastro Editor com Mock")
 @ExtendWith(MockitoExtension.class)
 public class CadastroEditorMockTest {
-
-
     @Captor
     ArgumentCaptor<Mensagem> mensagemArgumentCaptor;
-
     @Mock
     ArmazenamentoEditor armazenamentoEditor;
     @Mock
     GerenciadorEnvioEmail gerenciadorEnvioEmail;
-
     @InjectMocks
     CadastroEditor cadastroEditor;
 
