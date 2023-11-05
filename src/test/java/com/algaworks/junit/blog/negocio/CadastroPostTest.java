@@ -15,6 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.util.Optional;
 
+import static com.algaworks.junit.blog.negocio.CadastroPostTest.PostTestData.existingValidPost;
+import static com.algaworks.junit.blog.negocio.CadastroPostTest.PostTestData.validPostNotCreated;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -34,33 +36,25 @@ class CadastroPostTest {
     GerenciadorNotificacao gerenciadorNotificacao;
     @InjectMocks
     CadastroPost cadastroPost;
-    @Spy
-    Editor editor = new Editor(1L, "Filipe", "filipe@gmail.com",
-            BigDecimal.TEN, true);
-
 
     @Nested
     @DisplayName("Method: criar -> @param Post, @return Post") // MÉTODO QUE VOU TESTAR
-    class criarMethodTests {
+    class CriarMethodTests {
         @Nested
         @DisplayName("GIVEN a valid post") //CONDIÇÃO DO TESTE
-        class givenNormalPost {
+        class GivenNormalPost {
             @Spy
-            Post validPost = new Post();
+            Post validPost;
 
             //VALID POST
             @BeforeEach
             void validPost() {
-                validPost.setAutor(editor);
-                validPost.setTitulo("Meu Post");
-                validPost.setConteudo("Conteudo do Post");
-                validPost.setPago(true);
-                validPost.setPublicado(true);
+                validPost = validPostNotCreated();
             }
 
             @Nested
             @DisplayName("WHEN creating a post") //CASO ESPECIFICO
-            class whenCreating {
+            class WhenCreating {
                 private Post postCreated;
 
                 @BeforeEach
@@ -81,7 +75,7 @@ class CadastroPostTest {
 
                 @Nested
                 @DisplayName("TO ASSERT information is being registered")
-                class assertInformation {
+                class AssertInformation {
                     @Test
                     @DisplayName("return a creation Id")
                         //RESULTADO
@@ -92,24 +86,19 @@ class CadastroPostTest {
                     @Test
                     @DisplayName("return a post with Ganhos")
                     void returnWithGanhos() {
-                        verify(postCreated,
-                                times(1))
-                                .setGanhos(any(Ganhos.class));
+                        assertNotNull(postCreated.getGanhos());
                     }
 
                     @Test
                     @DisplayName("return a post with Slug")
                     void returnWithSlug() {
-                        verify(postCreated,
-                                times(1))
-                                .setSlug(anyString());
                         assertNotNull(postCreated.getSlug());
                     }
                 }
 
                 @Nested
                 @DisplayName("TO ASSERT all actions are being performed")
-                class assertMethodsIntegrity {
+                class AssertMethodsIntegrity {
                     @Test
                     @DisplayName("verify if the .salvar() was called")
                     void verifySave() {
@@ -135,7 +124,7 @@ class CadastroPostTest {
 
         @Nested
         @DisplayName("GIVEN a null post")
-        class givenNullPost {
+        class GivenNullPost {
             @Test
             @DisplayName("IF recieved null THEN throw exception and don't save")
             void nullException() {
@@ -147,28 +136,21 @@ class CadastroPostTest {
 
     @Nested
     @DisplayName("Method: editar -> @param Post, @return Post")
-    class editarMethodTests {
+    class EditarMethodTests {
         @Nested
         @DisplayName("GIVEN a valid post")
-        class givenNormalPost {
+        class GivenNormalPost {
             @Spy
-            Post validPost = new Post();
+            Post validPost;
 
             @BeforeEach
             void validPost() {
-                validPost.setId(1L);
-                validPost.setTitulo("Meu Post");
-                validPost.setConteudo("Conteudo do Post");
-                validPost.setAutor(editor);
-                validPost.setSlug("meu-post-123");
-                validPost.setGanhos(new Ganhos(BigDecimal.TEN, 3, BigDecimal.valueOf(30)));
-                validPost.setPago(true);
-                validPost.setPublicado(true);
+                validPost = existingValidPost();
             }
 
             @Nested
             @DisplayName("WHEN editing an existing post")
-            class whenEditing {
+            class WhenEditing {
                 @BeforeEach
                 void init() {
                     when(armazenamentoPost.salvar(any(Post.class)))
@@ -179,7 +161,7 @@ class CadastroPostTest {
 
                 @Nested
                 @DisplayName("TO ASSERT information is being registered")
-                class assertInformation {
+                class AssertInformation {
 
                     @BeforeEach
                     void editValidPost() {
@@ -212,14 +194,52 @@ class CadastroPostTest {
 
         @Nested
         @DisplayName("GIVEN a null post")
-        class givenNullPost {
+        class GivenNullPost {
 
         }
     }
 
     @Nested
     @DisplayName("Method: remover -> @param Long, @return void")
-    class removerMethodTests {
+    class RemoverMethodTests {
+    }
+
+    static class PostTestData {
+
+        public static Editor autorDoPost() {
+            return Editor.builder()
+                    .withId(1L)
+                    .withName("Filipe")
+                    .withEmail("filipe@gmail.com")
+                    .withValorPagoPorPalavra(BigDecimal.TEN)
+                    .withPremium(true)
+                    .build();
+//                    new Editor(1L, "Filipe", "filipe@gmail.com",
+//                    BigDecimal.TEN, true);
+        }
+
+        public static Post validPostNotCreated() {
+            Post validNotCreated = new Post();
+            validNotCreated.setAutor(autorDoPost());
+            validNotCreated.setTitulo("Meu Post");
+            validNotCreated.setConteudo("Conteudo do Post");
+            validNotCreated.setPago(true);
+            validNotCreated.setPublicado(true);
+            return validNotCreated;
+        }
+
+        public static Post existingValidPost() {
+            Post existingValidPost = new Post();
+            existingValidPost.setId(1L);
+            existingValidPost.setTitulo("Meu Post");
+            existingValidPost.setConteudo("Conteudo do Post");
+            existingValidPost.setAutor(autorDoPost());
+            existingValidPost.setSlug("meu-post-123");
+            existingValidPost.setGanhos(new Ganhos(BigDecimal.TEN, 3, BigDecimal.valueOf(30)));
+            existingValidPost.setPago(true);
+            existingValidPost.setPublicado(true);
+            return existingValidPost;
+        }
     }
 }
 
