@@ -13,6 +13,7 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,9 +21,8 @@ import static org.mockito.Mockito.*;
 
 
 @Nested
-@DisplayName("CadastroPost Tests")
+@DisplayName("CadastroPost Tests") //CLASSE QUE VOU TESTAR
 @ExtendWith(MockitoExtension.class)
-//CLASSE QUE VOU TESTAR
 class CadastroPostTest {
     @Captor
     ArgumentCaptor<Mensagem> argumentCaptor;
@@ -34,27 +34,28 @@ class CadastroPostTest {
     GerenciadorNotificacao gerenciadorNotificacao;
     @InjectMocks
     CadastroPost cadastroPost;
+    @Spy
+    Editor editor = new Editor(1L, "Filipe", "filipe@gmail.com",
+            BigDecimal.TEN, true);
 
-    // MÉTODO QUE VOU TESTAR
+
     @Nested
-    @DisplayName("Method: criar -> @param Post, @return Post")
+    @DisplayName("Method: criar -> @param Post, @return Post") // MÉTODO QUE VOU TESTAR
     class criarMethodTests {
         @Nested
-        @DisplayName("GIVEN a valid author and valid post") //CONDIÇÃO DO TESTE
+        @DisplayName("GIVEN a valid post") //CONDIÇÃO DO TESTE
         class givenNormalPost {
-            Editor editor = new Editor(1L, "Filipe", "filipe@gmail.com",
-                    BigDecimal.TEN, true);
             @Spy
-            Post postSpy = new Post();
+            Post validPost = new Post();
 
             //VALID POST
             @BeforeEach
             void validPost() {
-                postSpy.setAutor(editor);
-                postSpy.setTitulo("Meu Post");
-                postSpy.setConteudo("Conteudo do Post");
-                postSpy.setPago(true);
-                postSpy.setPublicado(true);
+                validPost.setAutor(editor);
+                validPost.setTitulo("Meu Post");
+                validPost.setConteudo("Conteudo do Post");
+                validPost.setPago(true);
+                validPost.setPublicado(true);
             }
 
             @Nested
@@ -63,64 +64,71 @@ class CadastroPostTest {
                 private Post postCreated;
 
                 @BeforeEach
-                void spyMethodInvocations() {
+                void mockInvocations() {
                     when(armazenamentoPost.salvar(any(Post.class)))
                             .thenAnswer(invocation -> {
                                 Post post = invocation.getArgument(0, Post.class);
                                 post.setId(1L);
                                 return post;
                             });
-                    when(calculadoraGanhos.calcular(postSpy))
+                    when(calculadoraGanhos.calcular(validPost))
                             .thenReturn(new Ganhos(BigDecimal.TEN,
                                     3,
                                     BigDecimal.valueOf(30)));
 
-                    postCreated = cadastroPost.criar(postSpy);
+                    postCreated = cadastroPost.criar(validPost);
                 }
 
-                @Test
-                @DisplayName("SHOULD return a creation Id")
-                    //RESULTADO
-                void returnCreationId() {
-                    assertEquals(1L, postCreated.getId());
+                @Nested
+                @DisplayName("TO ASSERT information is being registered")
+                class assertInformation {
+                    @Test
+                    @DisplayName("return a creation Id")
+                        //RESULTADO
+                    void returnCreationId() {
+                        assertEquals(1L, postCreated.getId());
+                    }
+
+                    @Test
+                    @DisplayName("return a post with Ganhos")
+                    void returnWithGanhos() {
+                        verify(postCreated,
+                                times(1))
+                                .setGanhos(any(Ganhos.class));
+                    }
+
+                    @Test
+                    @DisplayName("return a post with Slug")
+                    void returnWithSlug() {
+                        verify(postCreated,
+                                times(1))
+                                .setSlug(anyString());
+                        assertNotNull(postCreated.getSlug());
+                    }
                 }
 
-                @Test
-                @DisplayName("SHOULD verify if the .salvar() was called")
-                void verifySave() {
-                    verify(armazenamentoPost,
-                            times(1))
-                            .salvar(any(Post.class));
-                }
+                @Nested
+                @DisplayName("TO ASSERT all actions are being performed")
+                class assertMethodsIntegrity {
+                    @Test
+                    @DisplayName("verify if the .salvar() was called")
+                    void verifySave() {
+                        verify(armazenamentoPost,
+                                times(1))
+                                .salvar(any(Post.class));
+                    }
 
-                @Test
-                @DisplayName("SHOULD return a post with Ganhos")
-                void returnWithGanhos() {
-                    verify(postCreated,
-                            times(1))
-                            .setGanhos(any(Ganhos.class));
-                }
-
-                @Test
-                @DisplayName("SHOULD return a post with Slug")
-                void returnWithSlug() {
-                    verify(postCreated,
-                            times(1))
-                            .setSlug(anyString());
-                    assertNotNull(postCreated.getSlug());
-                }
-
-                @Test
-                @DisplayName("SHOULD call .calculate before .salvar")
-                void methodOrder() {
-                    InOrder inOrder = inOrder(calculadoraGanhos, armazenamentoPost);
-                    inOrder.verify(calculadoraGanhos,
-                                    times(1))
-                            .calcular(postCreated);
-                    inOrder.verify(armazenamentoPost,
-                                    times(1))
-                            .salvar(postCreated);
-
+                    @Test
+                    @DisplayName("call .calculate before .salvar")
+                    void methodOrder() {
+                        InOrder inOrder = inOrder(calculadoraGanhos, armazenamentoPost);
+                        inOrder.verify(calculadoraGanhos,
+                                        times(1))
+                                .calcular(postCreated);
+                        inOrder.verify(armazenamentoPost,
+                                        times(1))
+                                .salvar(postCreated);
+                    }
                 }
             }
         }
@@ -140,6 +148,73 @@ class CadastroPostTest {
     @Nested
     @DisplayName("Method: editar -> @param Post, @return Post")
     class editarMethodTests {
+        @Nested
+        @DisplayName("GIVEN a valid post")
+        class givenNormalPost {
+            @Spy
+            Post validPost = new Post();
+
+            @BeforeEach
+            void validPost() {
+                validPost.setId(1L);
+                validPost.setTitulo("Meu Post");
+                validPost.setConteudo("Conteudo do Post");
+                validPost.setAutor(editor);
+                validPost.setSlug("meu-post-123");
+                validPost.setGanhos(new Ganhos(BigDecimal.TEN, 3, BigDecimal.valueOf(30)));
+                validPost.setPago(true);
+                validPost.setPublicado(true);
+            }
+
+            @Nested
+            @DisplayName("WHEN editing an existing post")
+            class whenEditing {
+                @BeforeEach
+                void init() {
+                    when(armazenamentoPost.salvar(any(Post.class)))
+                            .then(invocation -> invocation.getArgument(0, Post.class));
+                    when(armazenamentoPost.encontrarPorId(1L))
+                            .thenReturn(Optional.ofNullable(validPost));
+                }
+
+                @Nested
+                @DisplayName("TO ASSERT information is being registered")
+                class assertInformation {
+
+                    @BeforeEach
+                    void editValidPost() {
+                        validPost.setConteudo("Conteúdo editado");
+                        cadastroPost.editar(validPost);
+                    }
+
+                    @Test
+                    @DisplayName("call .salvar() method")
+                    void callSalvar() {
+                        verify(armazenamentoPost,
+                                times(1))
+                                .salvar(any(Post.class));
+                    }
+
+                    @Test
+                    @DisplayName("return same id")
+                    void sameId() {
+                        assertEquals(1L, validPost.getId());
+                    }
+
+                    @Test
+                    @DisplayName("alter the content")
+                    void alterContent() {
+                        assertEquals("Conteúdo editado", validPost.getConteudo());
+                    }
+                }
+            }
+        }
+
+        @Nested
+        @DisplayName("GIVEN a null post")
+        class givenNullPost {
+
+        }
     }
 
     @Nested
