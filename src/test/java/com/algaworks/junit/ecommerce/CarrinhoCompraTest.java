@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Nested
@@ -295,6 +296,14 @@ class CarrinhoCompraTest {
                 cart.adicionarProduto(notebook, 1);
                 cart.adicionarProduto(notebook, 1);
                 cart.adicionarProduto(tablet, 1);
+            }
+
+            @Test
+            @DisplayName("Asserções de Listas")
+            void apenasProdutosAdicionados() {
+                assertThat(cart.getItens()).flatMap(ItemCarrinhoCompra::getProduto)
+                        .contains(notebook, tablet)
+                        .doesNotContain(chord);
             }
 
             @Test
