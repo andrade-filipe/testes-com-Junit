@@ -37,6 +37,44 @@ class CadastroPostTest {
     @InjectMocks
     CadastroPost cadastroPost;
 
+    static class PostTestData {
+
+        public static Editor autorDoPost() {
+            return Editor.builder()
+                    .withId(1L)
+                    .withName("Filipe")
+                    .withEmail("filipe@gmail.com")
+                    .withValorPagoPorPalavra(BigDecimal.TEN)
+                    .withPremium(true)
+                    .build();
+//                    new Editor(1L, "Filipe", "filipe@gmail.com",
+//                    BigDecimal.TEN, true);
+        }
+
+        public static Post validPostNotCreated() {
+            Post validNotCreated = new Post();
+            validNotCreated.setAutor(autorDoPost());
+            validNotCreated.setTitulo("Meu Post");
+            validNotCreated.setConteudo("Conteudo do Post");
+            validNotCreated.setPago(true);
+            validNotCreated.setPublicado(true);
+            return validNotCreated;
+        }
+
+        public static Post existingValidPost() {
+            Post existingValidPost = new Post();
+            existingValidPost.setId(1L);
+            existingValidPost.setTitulo("Meu Post");
+            existingValidPost.setConteudo("Conteudo do Post");
+            existingValidPost.setAutor(autorDoPost());
+            existingValidPost.setSlug("meu-post-123");
+            existingValidPost.setGanhos(new Ganhos(BigDecimal.TEN, 3, BigDecimal.valueOf(30)));
+            existingValidPost.setPago(true);
+            existingValidPost.setPublicado(true);
+            return existingValidPost;
+        }
+    }
+
     @Nested
     @DisplayName("Method: criar -> @param Post, @return Post") // MÉTODO QUE VOU TESTAR
     class CriarMethodTests {
@@ -202,44 +240,6 @@ class CadastroPostTest {
     @Nested
     @DisplayName("Method: remover -> @param Long, @return void")
     class RemoverMethodTests {
-    }
-
-    static class PostTestData {
-
-        public static Editor autorDoPost() {
-            return Editor.builder()
-                    .withId(1L)
-                    .withName("Filipe")
-                    .withEmail("filipe@gmail.com")
-                    .withValorPagoPorPalavra(BigDecimal.TEN)
-                    .withPremium(true)
-                    .build();
-//                    new Editor(1L, "Filipe", "filipe@gmail.com",
-//                    BigDecimal.TEN, true);
-        }
-
-        public static Post validPostNotCreated() {
-            Post validNotCreated = new Post();
-            validNotCreated.setAutor(autorDoPost());
-            validNotCreated.setTitulo("Meu Post");
-            validNotCreated.setConteudo("Conteudo do Post");
-            validNotCreated.setPago(true);
-            validNotCreated.setPublicado(true);
-            return validNotCreated;
-        }
-
-        public static Post existingValidPost() {
-            Post existingValidPost = new Post();
-            existingValidPost.setId(1L);
-            existingValidPost.setTitulo("Meu Post");
-            existingValidPost.setConteudo("Conteudo do Post");
-            existingValidPost.setAutor(autorDoPost());
-            existingValidPost.setSlug("meu-post-123");
-            existingValidPost.setGanhos(new Ganhos(BigDecimal.TEN, 3, BigDecimal.valueOf(30)));
-            existingValidPost.setPago(true);
-            existingValidPost.setPublicado(true);
-            return existingValidPost;
-        }
     }
 }
 

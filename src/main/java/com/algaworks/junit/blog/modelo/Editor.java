@@ -31,6 +31,10 @@ public class Editor {
         this.premium = premium;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     /**
      * Atualiza apenas com dados permitidos
      *
@@ -103,10 +107,6 @@ public class Editor {
     @Override
     public int hashCode() {
         return Objects.hash(id);
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     public final static class Builder {
