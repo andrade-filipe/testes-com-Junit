@@ -1,18 +1,28 @@
 package com.algaworks.junit.tddEssencial;
 
+import com.algaworks.junit.tddEssencial.desconto.CalculadoraFaixaDesconto;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class Pedido {
 
-    public List<ItemPedido>
+    private List<ItemPedido> itens = new ArrayList<>();
 
-    public void adicionarItem(String descricao, double preco, int quantidade) {
+    private CalculadoraFaixaDesconto calculadoraFaixaDesconto;
 
+    public Pedido(CalculadoraFaixaDesconto calculadoraFaixaDesconto) {
+        this.calculadoraFaixaDesconto = calculadoraFaixaDesconto;
     }
 
-    public double valorTotal() {
-        return 0.0;
+    public void adicionarItem(ItemPedido itemPedido) {
+        itens.add(itemPedido);
     }
 
-    public double desconto(){
-        return 0.0;
+    public ResumoPedido resumo() {
+        double valorTotal = itens.stream().mapToDouble(i -> i.getValorUnitario() * i.getQuantidade()).sum();
+        double desconto = calculadoraFaixaDesconto.desconto(valorTotal);
+
+        return new ResumoPedido(valorTotal, desconto);
     }
 }
